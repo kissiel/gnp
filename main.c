@@ -137,7 +137,7 @@ int status_cb(const char *path, unsigned int status_flags, void *payload)
 int stash_cb( size_t index, const char* message,
               const git_oid *stash_id, void *payload) {
     char pages[5] = {0xF0, 0x9F, 0x97, 0x90, 0};
-    printf("%s index: %lu, message: %s\n", pages, index, message);
+    //printf("%s index: %lu, message: %s\n", pages, index, message);
     return 0;
 
 }
