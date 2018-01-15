@@ -20,11 +20,11 @@ int main() {
 
     if (error == GIT_ENOTFOUND) {
         // not inside a git repo
-        printf("Not a repo\n");
+        //printf("Not a repo\n");
         return 0;
     }
     char* path = root.ptr;
-    printf("Opening: %s\n", path);
+    //printf("Opening: %s\n", path);
 
     error = git_repository_open(&repo, path);
     git_buf_free(&root);
@@ -33,7 +33,7 @@ int main() {
         printf("Error %d/%d: %s\n", error, e->klass, e->message);
         exit(error);
     }
-    printf("%d\n", error);
+    //printf("%d\n", error);
 
     status_data d = {0};
     error = git_status_foreach(repo, status_cb, &d);
@@ -42,20 +42,49 @@ int main() {
         printf("Error %d/%d: %s\n", error, e->klass, e->message);
         exit(error);
     }
-    printf("Staged: %i, Modified: %i\n", d.staged, d.modified);
+    //printf("Staged: %i, Modified: %i\n", d.staged, d.modified);
     error = git_stash_foreach(repo, stash_cb, &d);
     if (error < 0) {
         const git_error *e = giterr_last();
         printf("Error %d/%d: %s\n", error, e->klass, e->message);
         exit(error);
     }
-    /*
-    printf("%d\n", error);
+
+    //printf("%d\n", error);
     git_reference *ref = NULL;
-    error = git_reference_dwim(&ref, repo, "HEAD");
-    const char* buf = NULL;
-    git_branch_name(&buf, ref);
-    printf("%s\n", buf);*/
+    error = git_repository_head(&ref, repo);
+    if (error == GIT_EUNBORNBRANCH) {
+        if (git_repository_is_empty(repo)) {
+            printf("unborn\n");
+        }
+    } else if (error < 0) {
+        printf("error: %d\n", error);
+
+    } else {
+        error = git_reference_dwim(&ref, repo, "HEAD");
+        //printf("git_ref_dwim: %i\n", error);
+
+        const char* buf = NULL;
+        // git_branch_name returns -1 when detached
+        error = git_branch_name(&buf, ref);
+        //printf("git_branch_name: %i\n", error);
+        printf("\x1b[32m[%s] \x1b[0m", buf);
+
+
+        /*const char * wtf = git_reference_symbolic_target(ref);
+        git_ref_t type = git_reference_type(ref);
+        const char * w1 = git_reference_target(ref);
+        printf("!!!%s\n", w1);*/
+    }
+
+    if (error < 0) {
+
+    }
+    //printf("!!!%d\n", error);
+
+    //const char* buf = NULL;
+    //git_branch_name(&buf, ref);
+    //printf("%s\n", buf);
 
 
     shutdown();
@@ -105,7 +134,7 @@ int status_cb(const char *path, unsigned int status_flags, void *payload)
         return 0;
 }
 
-int stash_cb( size_t index, const char* message, 
+int stash_cb( size_t index, const char* message,
               const git_oid *stash_id, void *payload) {
     char pages[5] = {0xF0, 0x9F, 0x97, 0x90, 0};
     printf("%s index: %lu, message: %s\n", pages, index, message);
