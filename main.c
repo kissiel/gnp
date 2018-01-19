@@ -123,7 +123,7 @@ int status_cb(const char *path, unsigned int status_flags, void *payload)
             d->staged++;
         }
 
-        int modified_flags = GIT_STATUS_WT_NEW  | GIT_STATUS_WT_MODIFIED |
+        int modified_flags = GIT_STATUS_WT_MODIFIED |
             GIT_STATUS_WT_DELETED | GIT_STATUS_WT_RENAMED |
             GIT_STATUS_WT_TYPECHANGE;
 
