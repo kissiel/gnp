@@ -42,6 +42,24 @@ int main() {
         printf("Error %d/%d: %s\n", error, e->klass, e->message);
         exit(error);
     }
+    char extras[20] = "";
+    int size_left = 20; // this will be reduced with each added info
+    char *curr_extras = extras;
+    if (d.staged) {
+        int taken =  snprintf(curr_extras, size_left, "St:%d", d.staged);
+        curr_extras += taken;
+        size_left -= taken;
+    }
+    if (curr_extras != extras) {
+        int taken = snprintf(curr_extras, size_left, "|");
+        curr_extras += taken;
+        size_left -= taken;
+    }
+    if (d.modified) {
+        int taken =  snprintf(curr_extras, size_left, "Mo:%d", d.modified);
+        curr_extras += taken;
+        size_left -= taken;
+    }
     //printf("Staged: %i, Modified: %i\n", d.staged, d.modified);
     error = git_stash_foreach(repo, stash_cb, &d);
     if (error < 0) {
@@ -69,6 +87,9 @@ int main() {
         error = git_branch_name(&buf, ref);
         //printf("git_branch_name: %i\n", error);
         printf("\x1b[32m[%s] \x1b[0m", buf);
+        if (extras[0]) {
+            printf("\x1b[33m%s \x1b[0m", extras);
+        }
 
 
         /*const char * wtf = git_reference_symbolic_target(ref);
