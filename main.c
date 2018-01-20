@@ -50,12 +50,12 @@ int main() {
         curr_extras += taken;
         size_left -= taken;
     }
-    if (curr_extras != extras) {
-        int taken = snprintf(curr_extras, size_left, "|");
-        curr_extras += taken;
-        size_left -= taken;
-    }
     if (d.modified) {
+        if (curr_extras != extras) {
+            int taken = snprintf(curr_extras, size_left, "|");
+            curr_extras += taken;
+            size_left -= taken;
+        }
         int taken =  snprintf(curr_extras, size_left, "Mo:%d", d.modified);
         curr_extras += taken;
         size_left -= taken;
