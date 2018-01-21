@@ -46,7 +46,7 @@ int main() {
     int size_left = 20; // this will be reduced with each added info
     char *curr_extras = extras;
     if (d.staged) {
-        int taken =  snprintf(curr_extras, size_left, "St:%d", d.staged);
+        int taken = snprintf(curr_extras, size_left, "\x1b[32m%dS\x1b[0m", d.staged);
         curr_extras += taken;
         size_left -= taken;
     }
@@ -56,7 +56,7 @@ int main() {
             curr_extras += taken;
             size_left -= taken;
         }
-        int taken =  snprintf(curr_extras, size_left, "Mo:%d", d.modified);
+        int taken = snprintf(curr_extras, size_left, "\x1b[31m%dM\x1b[0m", d.modified);
         curr_extras += taken;
         size_left -= taken;
     }
@@ -86,10 +86,11 @@ int main() {
         // git_branch_name returns -1 when detached
         error = git_branch_name(&buf, ref);
         //printf("git_branch_name: %i\n", error);
-        printf("\x1b[32m[%s] \x1b[0m", buf);
+        printf("\x1b[33m[%s\x1b[0m", buf);
         if (extras[0]) {
-            printf("\x1b[33m%s \x1b[0m", extras);
+            printf(" %s", extras);
         }
+        printf("\x1b[33m] \x1b[0m");
 
 
         /*const char * wtf = git_reference_symbolic_target(ref);
