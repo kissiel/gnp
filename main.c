@@ -74,7 +74,7 @@ int main() {
     error = git_repository_head(&ref, repo);
     if (error == GIT_EUNBORNBRANCH) {
         if (git_repository_is_empty(repo)) {
-            printf("unborn\n");
+            buf = "New repo";
         }
     } else if (error < 0) {
         printf("error: %d\n", error);
@@ -83,22 +83,20 @@ int main() {
         error = git_reference_dwim(&ref, repo, "HEAD");
         //printf("git_ref_dwim: %i\n", error);
 
-        const char* buf = NULL;
         // git_branch_name returns -1 when detached
         error = git_branch_name(&buf, ref);
         //printf("git_branch_name: %i\n", error);
-        printf("\x1b[33m[%s\x1b[0m", buf);
-        if (extras[0]) {
-            printf(" %s", extras);
-        }
-        printf("\x1b[33m] \x1b[0m");
-
 
         /*const char * wtf = git_reference_symbolic_target(ref);
         git_ref_t type = git_reference_type(ref);
         const char * w1 = git_reference_target(ref);
         printf("!!!%s\n", w1);*/
     }
+    printf("\x1b[33m[%s\x1b[0m", buf);
+    if (extras[0]) {
+        printf(" %s", extras);
+    }
+    printf("\x1b[33m] \x1b[0m");
 
     if (error < 0) {
 
