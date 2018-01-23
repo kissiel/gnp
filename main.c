@@ -70,6 +70,7 @@ int main() {
 
     //printf("%d\n", error);
     git_reference *ref = NULL;
+    const char* buf = "DETACHED";
     error = git_repository_head(&ref, repo);
     if (error == GIT_EUNBORNBRANCH) {
         if (git_repository_is_empty(repo)) {
