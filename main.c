@@ -2,6 +2,13 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#ifdef DEBUG_TO_STDOUT
+#define log(...) do { printf(__VA_ARGS__); } while (0)
+#else
+# define log(...)
+#endif
+
+
 const char STASH_GLYPH[] = {0xF0, 0x9F, 0x97, 0x90, 0};
 void init();
 void shutdown();
