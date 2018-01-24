@@ -1,6 +1,8 @@
 #include <git2.h>
 #include <stdbool.h>
 #include <stdio.h>
+
+const char STASH_GLYPH[] = {0xF0, 0x9F, 0x97, 0x90, 0};
 void init();
 void shutdown();
 
@@ -9,6 +11,7 @@ int stash_cb(size_t, const char*, const git_oid *, void *);
 typedef struct {
     int modified;
     int staged;
+    int stashed;
 } status_data;
 
 
@@ -60,7 +63,7 @@ int main() {
         curr_extras += taken;
         size_left -= taken;
     }
-    //printf("Staged: %i, Modified: %i\n", d.staged, d.modified);
+
     error = git_stash_foreach(repo, stash_cb, &d);
     if (error < 0) {
         const git_error *e = giterr_last();
@@ -68,6 +71,18 @@ int main() {
         exit(error);
     }
 
+    if (d.stashed) {
+        if (curr_extras != extras) {
+            int taken = snprintf(curr_extras, size_left, "|");
+            curr_extras += taken;
+            size_left -= taken;
+        }
+        //int taken = snprintf(curr_extras, size_left, "\x1b[34m%d\xF0\x9F\x97\x90\x1b[0m", d.stashed);
+        int taken = snprintf(curr_extras, size_left, "\x1b[34m%d#\x1b[0m", d.stashed);
+        curr_extras += taken;
+        size_left -= taken;
+    }
+    //printf("Staged: %i, Modified: %i\n", d.staged, d.modified);
     //printf("%d\n", error);
     git_reference *ref = NULL;
     const char* buf = "DETACHED";
@@ -157,8 +172,8 @@ int status_cb(const char *path, unsigned int status_flags, void *payload)
 
 int stash_cb( size_t index, const char* message,
               const git_oid *stash_id, void *payload) {
-    char pages[5] = {0xF0, 0x9F, 0x97, 0x90, 0};
-    //printf("%s index: %lu, message: %s\n", pages, index, message);
+    status_data *d = (status_data*)payload;
+    d->stashed++;
     return 0;
 
 }
