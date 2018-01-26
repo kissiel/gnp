@@ -30,26 +30,23 @@ int main() {
 
     if (error == GIT_ENOTFOUND) {
         // not inside a git repo
-        //printf("Not a repo\n");
         return 0;
     }
     char* path = root.ptr;
-    //printf("Opening: %s\n", path);
 
     error = git_repository_open(&repo, path);
     git_buf_free(&root);
     if (error < 0) {
         const git_error *e = giterr_last();
-        printf("Error %d/%d: %s\n", error, e->klass, e->message);
+        log("Error %d/%d: %s\n", error, e->klass, e->message);
         exit(error);
     }
-    //printf("%d\n", error);
 
     status_data d = {0};
     error = git_status_foreach(repo, status_cb, &d);
     if (error < 0) {
         const git_error *e = giterr_last();
-        printf("Error %d/%d: %s\n", error, e->klass, e->message);
+        log("Error %d/%d: %s\n", error, e->klass, e->message);
         exit(error);
     }
     char extras[20] = "";
@@ -74,7 +71,7 @@ int main() {
     error = git_stash_foreach(repo, stash_cb, &d);
     if (error < 0) {
         const git_error *e = giterr_last();
-        printf("Error %d/%d: %s\n", error, e->klass, e->message);
+        log("Error %d/%d: %s\n", error, e->klass, e->message);
         exit(error);
     }
 
@@ -84,13 +81,10 @@ int main() {
             curr_extras += taken;
             size_left -= taken;
         }
-        //int taken = snprintf(curr_extras, size_left, "\x1b[34m%d\xF0\x9F\x97\x90\x1b[0m", d.stashed);
         int taken = snprintf(curr_extras, size_left, "\x1b[34m%d#\x1b[0m", d.stashed);
         curr_extras += taken;
         size_left -= taken;
     }
-    //printf("Staged: %i, Modified: %i\n", d.staged, d.modified);
-    //printf("%d\n", error);
     git_reference *ref = NULL;
     const char* buf = "DETACHED";
     error = git_repository_head(&ref, repo);
@@ -99,36 +93,26 @@ int main() {
             buf = "New repo";
         }
     } else if (error < 0) {
-        printf("error: %d\n", error);
+        log("error: %d\n", error);
 
     } else {
         error = git_reference_dwim(&ref, repo, "HEAD");
-        //printf("git_ref_dwim: %i\n", error);
+        if (error) {
+            log("git_ref_dwim: %i\n", error);
+        }
 
-        // git_branch_name returns -1 when detached
+        // git_branch_name returns -1 when the branch is "neither local or remote branch"
+        // which means it's probably DETACHED
         error = git_branch_name(&buf, ref);
-        //printf("git_branch_name: %i\n", error);
-
-        /*const char * wtf = git_reference_symbolic_target(ref);
-        git_ref_t type = git_reference_type(ref);
-        const char * w1 = git_reference_target(ref);
-        printf("!!!%s\n", w1);*/
+        log("git_branch_name: %i\n", error);
     }
+    //print branch name
     printf("\x1b[33m[%s\x1b[0m", buf);
     if (extras[0]) {
+        // print info about the status
         printf(" %s", extras);
     }
-    printf("\x1b[33m] \x1b[0m");
-
-    if (error < 0) {
-
-    }
-    //printf("!!!%d\n", error);
-
-    //const char* buf = NULL;
-    //git_branch_name(&buf, ref);
-    //printf("%s\n", buf);
-
+    printf(" ");
 
     shutdown();
 }
@@ -173,7 +157,6 @@ int status_cb(const char *path, unsigned int status_flags, void *payload)
         if (status_flags & modified_flags) {
             d->modified++;
         }
-        //printf("status_cb, path: %s\n flags: %u\n", path, status_flags);
         return 0;
 }
 
