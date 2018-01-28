@@ -127,7 +127,7 @@ int main() {
         // print info about the status
         printf(" %s", extras);
     }
-    printf(" ");
+    printf("\x1b[33m]\x1b[0m ");
 
     shutdown();
 }
